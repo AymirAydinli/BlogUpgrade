@@ -10,6 +10,7 @@ import smtplib
 load_dotenv()
 
 app_pwd = os.getenv("APP_PWD")
+email_account = os.getenv("EMAIL")
 
 response = requests.get('https://api.npoint.io/eb6cd8a5d783f501ee7d')
 
@@ -39,21 +40,22 @@ def about():
 def contact():
     if request.method == 'POST':
         name = request.form['name']
-        sender = request.form['email']
-        number = request.form['phone_number']
+        email = request.form['email']
+        phone = request.form['phone_number']
         message = request.form['message']
-        receivers = 'aaaxilles@gmail.com'
-
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as connection:
-            connection.login(receivers, app_pwd)
-            connection.sendmail(from_addr=sender,
-                                to_addrs='aaaxilles@gmail.com',
-                                msg=f'Subject: from {name} \n\n {message}'
-                                )
-            connection.close()
+        send_email(name, email, phone, message)
 
         return render_template('contact.html', msg_sent=True)
     return render_template('contact.html', msg_sent=False)
+
+
+def send_email(name, email, phone, message):
+    email_message = f"Subject:New Message\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nMessage: {message}"
+    with smtplib.SMTP('smtp.gmail.com') as connection:
+        connection.starttls()
+        connection.login(email_account, app_pwd)
+        connection.sendmail(email_account, email_account, message)
+
 
 
 
